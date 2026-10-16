@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Stealth</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a href="index.html" class="logo"><span class="logo-icon">S</span><span class="logo-text">Stealth</span></a>
+    <nav class="nav-links">
+      <a href="admin.html">Admin</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html">Site</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" id="nav-logout">Logout</button>
+    </div>
+  </header>
+  <main class="dash-wrap">
+    <div id="gate" class="auth-card" style="max-width:420px;margin:4rem auto;display:none">
+      <h1>Admin only</h1>
+      <p class="auth-sub">Login with admin credentials from .env</p>
+      <a href="login.html" class="btn btn-primary" style="width:100%;margin-top:1rem">Login</a>
+    </div>
+    <div id="panel" class="hidden">
+      <div class="dash-header">
+        <div><h1>Admin panel</h1><p class="muted">Users & orders</p></div>
+      </div>
+      <div class="dash-card" style="margin-bottom:1rem"><h3>Stats</h3><div class="tool-row" id="stats"></div></div>
+      <div class="dash-card" style="margin-bottom:1rem">
+        <h3>Users</h3>
+        <div class="table-wrap">
+          <table class="admin-table" id="users-table">
+            <thead><tr><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="dash-card">
+        <h3>Orders</h3>
+        <div class="table-wrap">
+          <table class="admin-table" id="orders-table">
+            <thead><tr><th>Order</th><th>Email</th><th>Plan</th><th>Price</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="toast hidden" id="toast"></div>
+  <script src="/app.js"></script>
+  <script>
+    (async function () {
+      const A = window.StealthAuth;
+      if (!A || !A.getToken()) {
+        document.getElementById("gate").style.display = "block";
+        return;
+      }
+      let me;
+      try { me = await A.fetchMe(); } catch {
+        document.getElementById("gate").style.display = "block";
+        return;
+      }
+      if (!me || me.role !== "admin") {
+        document.getElementById("gate").style.display = "block";
+        return;
+      }
+      document.getElementById("panel").classList.remove("hidden");
+
+      async function render() {
+        const { users } = await A.api("/api/admin/users");
+        const { orders } = await A.api("/api/admin/orders");
+        const paid = users.filter((u) => u.planStatus === "paid").length;
+        document.getElementById("stats").innerHTML =
+          "<span class='stat'>Users: <b>" + users.length + "</b></span>" +
+          "<span class='stat'>Paid: <b>" + paid + "</b></span>" +
+          "<span class='stat'>Orders: <b>" + orders.length + "</b></span>";
+        const tbody = document.querySelector("#users-table tbody");
+        tbody.innerHTML = "";
+        users.forEach((u) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = "<td>" + u.email + "</td><td>" + (u.role||"user") + "</td><td>" + (u.plan||"—") + "</td><td>" + (u.planStatus||"none") + "</td><td class='actions'></td>";
+          const actions = tr.querySelector(".actions");
+          if (u.planStatus !== "paid") {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-outline";
+            btn.style.cssText = "padding:0.3rem 0.7rem;font-size:0.8rem";
+            btn.textContent = "Mark paid";
+            btn.onclick = async () => {
+              await A.api("/api/admin/mark-paid", { method: "POST", body: JSON.stringify({ email: u.email, plan: u.plan || "pro" }) });
+              render();
+            };
+            actions.appendChild(btn);
+          } else {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-ghost";
+            btn.style.cssText = "padding:0.3rem 0.7rem;font-size:0.8rem";
+            btn.textContent = "Revoke";
+            btn.onclick = async () => {
+              await A.api("/api/admin/revoke", { method: "POST", body: JSON.stringify({ email: u.email }) });
+              render();
+            };
+            actions.appendChild(btn);
+          }
+          tbody.appendChild(tr);
+        });
+        const ot = document.querySelector("#orders-table tbody");
+        ot.innerHTML = "";
+        orders.forEach((o) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td class='mono'>" + (o.orderId||"—") + "</td><td>" + (o.email||"—") + "</td><td>" + (o.plan||"—") +
+            "</td><td>$" + (o.price||"—") + "</td><td>" + (o.status||"—") + "</td><td>" +
+            (o.created ? new Date(o.created).toLocaleString() : "—") + "</td>";
+          ot.appendChild(tr);
+        });
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>

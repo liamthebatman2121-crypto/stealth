@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Stealth</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a href="index.html" class="logo"><span class="logo-icon">S</span><span class="logo-text">Stealth</span></a>
+    <nav class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="index.html#plans">Plans</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" id="nav-logout">Logout</button>
+    </div>
+  </header>
+  <main class="dash-wrap">
+    <div id="gate" class="auth-card" style="max-width:420px;margin:4rem auto;display:none">
+      <h1>Access locked</h1>
+      <p class="auth-sub" id="gate-msg">Login and complete payment to open the dashboard.</p>
+      <a href="login.html" class="btn btn-primary" style="width:100%;margin-top:1rem">Login</a>
+      <a href="index.html#plans" class="btn btn-outline" style="width:100%;margin-top:0.6rem">Select a plan</a>
+    </div>
+    <div id="dash" class="hidden">
+      <div class="dash-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="muted" id="dash-user"></p>
+        </div>
+        <div class="plan-pill" id="plan-pill">—</div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card"><h3>Plan status</h3><p id="plan-status-text">—</p></div>
+        <div class="dash-card"><h3>Invoice</h3><p id="invoice-text" class="mono">—</p></div>
+        <div class="dash-card"><h3>Paid at</h3><p id="paid-at">—</p></div>
+      </div>
+      <div class="dash-card" style="margin-top:1rem">
+        <h3>Quick tools</h3>
+        <p class="muted" style="margin-bottom:1rem">Your lifetime access is active. Wire real tools here.</p>
+        <div class="tool-row">
+          <button class="btn btn-outline" disabled>Page Cloner</button>
+          <button class="btn btn-outline" disabled>Seed Grabber</button>
+          <button class="btn btn-outline" disabled>Live Logs</button>
+          <button class="btn btn-outline" disabled>Request Page</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <div class="toast hidden" id="toast"></div>
+  <script src="/app.js"></script>
+  <script>
+    (async function () {
+      const A = window.StealthAuth;
+      if (!A) return;
+      if (!A.getToken()) {
+        document.getElementById("gate").style.display = "block";
+        return;
+      }
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("paid") === "1" && params.get("order")) {
+        try {
+          await A.api("/api/pay/activate-return", {
+            method: "POST",
+            body: JSON.stringify({ orderId: params.get("order") })
+          });
+        } catch (e) {}
+      }
+      let me;
+      try {
+        me = await A.fetchMe();
+      } catch {
+        document.getElementById("gate").style.display = "block";
+        return;
+      }
+      if (!me || (me.planStatus !== "paid" && me.role !== "admin")) {
+        document.getElementById("gate").style.display = "block";
+        document.getElementById("gate-msg").textContent = "Payment not confirmed yet.";
+        return;
+      }
+      document.getElementById("dash").classList.remove("hidden");
+      document.getElementById("dash-user").textContent = me.email;
+      document.getElementById("plan-pill").textContent = (me.plan || "—").toUpperCase() + " · lifetime";
+      document.getElementById("plan-status-text").textContent = "Active — " + (me.plan || "").toUpperCase();
+      document.getElementById("invoice-text").textContent = me.invoiceId || "—";
+      document.getElementById("paid-at").textContent = me.paidAt ? new Date(me.paidAt).toLocaleString() : "—";
+    })();
+  </script>
+</body>
+</html>

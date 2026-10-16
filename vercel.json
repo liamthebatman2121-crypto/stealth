@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/pay/status/:orderId", "destination": "/api/pay/status?orderId=:orderId" }
+  ]
+}

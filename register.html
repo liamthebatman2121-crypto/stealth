@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — Stealth</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="config.js"></script>
+  <script>if(typeof window.STEALTH_CONFIG==="undefined"){window.STEALTH_CONFIG={NOWPAYMENTS_API_KEY:"",SITE_URL:".",ADMIN_EMAIL:"admin@stealth.local",ADMIN_PASSWORD:"CHANGE_ME_ADMIN_PASS",PLANS:{}};}</script>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">S</span>
+      <span class="logo-text">Stealth</span>
+    </a>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost">Login</a>
+    </div>
+  </header>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <h1>Create account</h1>
+      <p class="auth-sub">Register to unlock plans and payment</p>
+      <div class="auth-error" id="auth-error"></div>
+      <form id="register-form">
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input type="email" id="reg-email" placeholder="you@email.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="reg-pass">Password</label>
+          <input type="password" id="reg-pass" placeholder="min 6 characters" required autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <label for="reg-pass2">Confirm password</label>
+          <input type="password" id="reg-pass2" placeholder="repeat password" required autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+      <p class="auth-footer">Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

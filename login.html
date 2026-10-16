@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Stealth</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="config.js"></script>
+  <script>if(typeof window.STEALTH_CONFIG==="undefined"){window.STEALTH_CONFIG={NOWPAYMENTS_API_KEY:"",SITE_URL:".",ADMIN_EMAIL:"admin@stealth.local",ADMIN_PASSWORD:"CHANGE_ME_ADMIN_PASS",PLANS:{}};}</script>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <header class="nav">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">S</span>
+      <span class="logo-text">Stealth</span>
+    </a>
+    <div class="nav-actions">
+      <a href="register.html" class="btn btn-outline">Register</a>
+    </div>
+  </header>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <h1>Welcome back</h1>
+      <p class="auth-sub">Login to select a plan and pay</p>
+      <div class="auth-error" id="auth-error"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="you@email.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      <p class="auth-footer">No account? <a href="register.html">Register</a></p>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
