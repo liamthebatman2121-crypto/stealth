@@ -1,7 +1,0 @@
-.env
-data/
-server/node_modules/
-node_modules/
-*.log
-.DS_Store
-config.js
